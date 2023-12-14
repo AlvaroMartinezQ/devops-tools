@@ -14,3 +14,16 @@ crash.log
 
 # For built boxes
 *.box
+
+# Certificates
+*.pem
+
+# Build Packer logs
+output.json.lock
+output.json
+
+# Cloud keys
+variables.json
+
+# Images folder
+imgs/

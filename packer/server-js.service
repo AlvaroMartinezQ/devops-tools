@@ -1,0 +1,16 @@
+[Unit]
+Description=Node JS daemon process
+
+[Service]
+User=ubuntu
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /home/ubuntu/server.js
+Restart=always
+RestartSec=10
+WorkingDirectory=/home/ubuntu
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=server-js
+
+[Install]
+WantedBy=multi-user.target
