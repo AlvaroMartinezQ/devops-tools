@@ -36,7 +36,7 @@
   "post-processors": [
     {
       "type": "manifest",
-      "output": "output.json",
+      "output": "output-mongo.json",
       "strip_path": true
     }
   ]
