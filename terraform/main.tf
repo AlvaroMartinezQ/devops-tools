@@ -28,6 +28,13 @@ resource "aws_instance" "server_instance" {
   tags = {
     Name = "server"
   }
+
+  depends_on = [aws_instance.mongo_instance]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "MONGO_IP=${aws_instance.mongo_instance.private_ip}" > /mongo_ip.txt
+              EOF
 }
 
 ## Security Groups
