@@ -33,7 +33,7 @@ resource "aws_instance" "server_instance" {
 
   user_data = <<-EOF
               #!/bin/bash
-              echo "MONGO_IP=${aws_instance.mongo_instance.private_ip}" > /mongo_ip.txt
+              echo "mongodb://${aws_instance.mongo_instance.private_ip}:27017/test" > /mongo.env
               EOF
 }
 
