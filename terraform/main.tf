@@ -40,8 +40,34 @@ resource "aws_instance" "server_instance" {
 ## Security Groups
 # See @link:https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
 
-resource "aws_security_group" "deployment_sg" {
-  name        = "mudevops05-deployment-sg"
+resource "aws_security_group" "deployment_sg_mongo" {
+  name        = "mudevops05-deployment-sg-mongo"
+  description = "Allow SSH and HTTP traffic"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 27017
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "deployment_sg_server" {
+  name        = "mudevops05-deployment-sg-server"
   description = "Allow SSH and HTTP traffic"
 
   ingress {
@@ -70,11 +96,11 @@ resource "aws_security_group" "deployment_sg" {
 # See @link:https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface_sg_attachment
 
 resource "aws_network_interface_sg_attachment" "mongo_instance_sg_attachment" {
-  security_group_id    = aws_security_group.deployment_sg.id
+  security_group_id    = aws_security_group.deployment_sg_mongo.id
   network_interface_id = aws_instance.mongo_instance.primary_network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "server_instance_sg_attachment" {
-  security_group_id    = aws_security_group.deployment_sg.id
+  security_group_id    = aws_security_group.deployment_sg_server.id
   network_interface_id = aws_instance.server_instance.primary_network_interface_id
 }
