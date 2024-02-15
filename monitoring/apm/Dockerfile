@@ -1,0 +1,1 @@
+FROM docker.elastic.co/apm/apm-server:8.12.0

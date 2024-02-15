@@ -1,0 +1,90 @@
+version: "3.8"
+services:
+  ##
+  # APP
+  ##
+  nginx-node-app:
+    build:
+      context: ./app
+    ports:
+      - "8080:80"
+    volumes:
+      - nginx-logs:/app/nginx/logs # Mount the nginx log directory to share logs with Filebeat
+  ##
+  # Elastic and Kibana
+  ##
+  elasticsearch:
+    build:
+      context: ./elastic
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+  kibana:
+    build:
+      context: ./kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  ##
+  # Beats
+  ##
+  filebeat:
+    build:
+      context: ./filebeat
+    volumes:
+      - nginx-logs:/usr/share/filebeat/logs # Mount the nginx log directory to read logs
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    command: filebeat -e -strict.perms=false
+  metricbeat:
+    build:
+      context: ./metricbeat
+    volumes:
+      # Mount the necessary directories to read system metrics with the local docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    command: metricbeat -e -strict.perms=false
+  heartbeat:
+    build:
+      context: ./heartbeat
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    command: heartbeat -e -strict.perms=false
+  ##
+  # APM
+  ##
+  apm:
+    build:
+      context: ./apm
+    ports:
+      - "8200:8200"
+    depends_on:
+      - elasticsearch
+    command: apm-server run -e
+    environment:
+      #- output.elasticsearch.hosts=["elasticsearch:9200"]
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - apm-server.rum.enabled=true
+      - apm-server.rum.event_rate.limit=1000
+volumes:
+  nginx-logs:
+    driver: local

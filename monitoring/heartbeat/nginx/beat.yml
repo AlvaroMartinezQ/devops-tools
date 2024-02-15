@@ -1,0 +1,12 @@
+heartbeat.monitors:
+  - type: http
+    id: service-status
+    name: Nginx Service Status
+    service.name: nginx-node-app
+    hosts: ["http://nginx-node-app:80/"] # Refers to name from docker-compose.yml
+    check.response.status: [200]
+    schedule: "@every 30s"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "container_heartbeats"

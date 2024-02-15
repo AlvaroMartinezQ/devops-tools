@@ -1,0 +1,30 @@
+metricbeat.modules:
+  - module: docker
+    enabled: true
+    metricsets:
+      - "cpu"
+      - "memory"
+    hosts: ["unix:///var/run/docker.sock"]
+    period: 30s
+    output.elasticsearch:
+      index: "container_resources"
+
+# Another example to monitor nginx requests
+# - module: nginx
+#   enabled: true
+#   metricsets:
+#     - "stubstatus"
+#   # Nginx hosts
+#   hosts: ["http://nginx-node-app:80"] # Refers to name from docker-compose.yml
+#   period: 10s
+#   # Path to server status. Default nginx_status
+#   server_status_path: "nginx_status"
+#   output.elasticsearch:
+#     index: "nginx_status_metrics"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "container_metrics"
+
+setup.template.name: "app"
+setup.template.pattern: "app-*"
